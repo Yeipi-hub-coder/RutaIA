@@ -19,6 +19,8 @@ spring:
 n8n:
   webhook-url: https://reselect-contort-carwash.ngrok-free.dev/webhook/buscar_curso_rutaIA
   timeout-ms: 15000
+  webhook-url1: https://reselect-contort-carwash.ngrok-free.dev/webhook-test/request-1
+  webhook-url2: https://reselect-contort-carwash.ngrok-free.dev/webhook-test/request-2
 
 
 springdoc:

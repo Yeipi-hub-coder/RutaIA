@@ -1,4 +1,4 @@
-package com.rutaia.backend.service.impl;
+package com.rutaia.backend.service.impl;compararPreguntas
 
 import com.rutaia.backend.config.N8nProperties;
 import com.rutaia.backend.dto.Request.N8nRequestDTO;
@@ -37,4 +37,17 @@ public class N8nClientServiceImpl implements N8nClientService {
                     .build();
         }
     }
+
+    @Override
+    public N8nResponseDTO compararPreguntas(N8nRequestDTO request1, N8nRequestDTO request2) {
+        try {
+            return restClient.post()
+                    .uri(n8nProperties.getWebhookUrl())
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(request1)
+                    .retrieve()
+                    .body(N8nResponseDTO.class);
+        } catch ()
+    }
+
 }

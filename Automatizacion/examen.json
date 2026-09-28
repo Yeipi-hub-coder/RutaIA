@@ -1,0 +1,272 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const b = $input.first().json.body;\nreturn [{json: \n  {\n    pregunta:b.pregunta,\n    modelo_embedding:'openai/text-embedding-3-small'\n  }\n}];"
+        },
+        "id": "0b9b3502-6a44-4f14-9e3d-115796f2edff",
+        "name": "Preparar Pregunta1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1248,
+          -528
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const b = $input.first().json;\nreturn [{json: \n  {\n    pregunta:b.pregunta2,\n    modelo_embedding:'openai/text-embedding-3-small'\n  }\n}];"
+        },
+        "id": "12962557-f612-4f06-a8fc-9c304b97d5af",
+        "name": "Preparar Pregunta2",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1264,
+          -352
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "request-1",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "884cd258-e3a1-46db-9e0c-13fc94dafe98",
+        "name": "Webhook request1",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1632,
+          -528
+        ],
+        "webhookId": "f5bf59c8-0502-462a-ada9-c936d32acad0"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "request-2",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "12301b52-13f3-4c60-a848-4527ad224d2d",
+        "name": "Webhook request2",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1632,
+          -352
+        ],
+        "webhookId": "f5bf59c8-0502-462a-ada9-c936d32acad0"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/embeddings",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBearerAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({model:$json.modelo_embedding,input:$json.pregunta,encoding_format:'float'}) }}",
+          "options": {}
+        },
+        "id": "34d8767a-9427-4151-949a-ca2baaebf07c",
+        "name": "Embedding Pregunta1",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -992,
+          -528
+        ],
+        "credentials": {
+          "httpBearerAuth": {
+            "id": "GqKaPtmpNJMdMx8I",
+            "name": "Bearer Auth account"
+          }
+        },
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/embeddings",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBearerAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({model:$json.modelo_embedding,input:$json.pregunta,encoding_format:'float'}) }}",
+          "options": {}
+        },
+        "id": "2a0b5b5b-5f04-4a58-978e-7c837bfa36b3",
+        "name": "Embedding Pregunta2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -992,
+          -352
+        ],
+        "credentials": {
+          "httpBearerAuth": {
+            "id": "GqKaPtmpNJMdMx8I",
+            "name": "Bearer Auth account"
+          }
+        },
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const pregunta1 = $('Embedding Pregunta1').first().json;\nreturn [{\n  json:{\n    vector1:pregunta1.data[0].embedding\n  }\n}];"
+        },
+        "id": "6ff00e68-8487-4325-8197-cccf0427d4a4",
+        "name": "Preparar Pregunta3",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -608,
+          -448
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          -176,
+          -448
+        ],
+        "id": "b5b83a8b-67ff-40cc-9d1d-a8b214ea3042",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "jsCode": "const vecA = $input.first().json.vector1;\nconst vecB = $input.first().json.vector2;\n\nreturn vecA.reduce((sum, val, index) => sum + val * vecB[index], 0);"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -384,
+          -448
+        ],
+        "id": "3a94b98a-fa7f-49dc-a269-9077f6e570b1",
+        "name": "Code in JavaScript1"
+      }
+    ],
+    "connections": {
+      "Preparar Pregunta1": {
+        "main": [
+          [
+            {
+              "node": "Embedding Pregunta1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Pregunta2": {
+        "main": [
+          [
+            {
+              "node": "Embedding Pregunta2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook request1": {
+        "main": [
+          [
+            {
+              "node": "Preparar Pregunta1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook request2": {
+        "main": [
+          [
+            {
+              "node": "Preparar Pregunta2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embedding Pregunta1": {
+        "main": [
+          [
+            {
+              "node": "Preparar Pregunta3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embedding Pregunta2": {
+        "main": [
+          [
+            {
+              "node": "Preparar Pregunta3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Pregunta3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "455a100aeea20d7fb05bf5b5d63457aac0736dc81fe3d671b79aabf6cef9f78b"
+    }
+  }

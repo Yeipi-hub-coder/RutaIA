@@ -7,6 +7,6 @@ import lombok.*;
 public class N8nRequestDTO {
     private Integer consultaId;
     private String pregunta;
-    private String nivelExperiencia;
+    private String nivelExperiencia;  //AQUI  se envia el nivel de experiencia
     private String areaInteres;
 }

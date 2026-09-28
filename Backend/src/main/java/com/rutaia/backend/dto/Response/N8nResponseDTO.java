@@ -11,4 +11,5 @@ public class N8nResponseDTO {
     private String estado;
     private String respuesta;
     private List<N8nFuenteDTO> fuentes;
+    private String nivelExperiencia;
 }

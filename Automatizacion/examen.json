@@ -1,0 +1,175 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "examen",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -96,
+          48
+        ],
+        "id": "fd505040-8cae-44d8-9594-58c3aff6ba33",
+        "name": "Webhook",
+        "webhookId": "3f99887e-9c9c-4330-9a03-d54afb1a66d9"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/embeddings",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBearerAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({model:$json.modelo_embedding,input:$json.preguntaA,encoding_format:'float'}) }}",
+          "options": {}
+        },
+        "id": "64b91bba-ee39-44ce-8c1f-fa0cb47aaf49",
+        "name": "Embedding examen",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          400,
+          -64
+        ],
+        "credentials": {
+          "httpBearerAuth": {
+            "id": "1pJv9XX7Ujyk3Hxv",
+            "name": "Bearer Auth account"
+          }
+        },
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const b=$json.body??$json; \nif(!b.preguntaA?.trim()) throw new Error('Falta pregunta'); \nreturn [{json: \n  {\n    preguntaA:b.preguntaA.trim(),\n    modelo_embedding:'openai/text-embedding-3-small',\n    prompt:'compara estos embeddings'\n  }\n}];"
+        },
+        "id": "a6c0089c-0dd3-4f01-a7d3-fe97dbdd2942",
+        "name": "Preparar Pregunta 1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const b=$json.body??$json; \nif(!b.preguntaB?.trim()) throw new Error('Falta pregunta'); \nreturn [{json: \n  {\n    preguntaB:b.preguntaB.trim(),\n    modelo_embedding:'openai/text-embedding-3-small',\n  }\n}];"
+        },
+        "id": "b39dae73-2830-4663-a8c5-375bcfa98098",
+        "name": "Preparar Pregunta 2 ",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          128
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/embeddings",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBearerAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({model:$json.modelo_embedding,input:$json.preguntaB,encoding_format:'float'}) }}",
+          "options": {}
+        },
+        "id": "37c68a44-4282-4a77-a69f-b4c2e34ed8d2",
+        "name": "Embedding examen1",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          400,
+          128
+        ],
+        "credentials": {
+          "httpBearerAuth": {
+            "id": "1pJv9XX7Ujyk3Hxv",
+            "name": "Bearer Auth account"
+          }
+        },
+        "onError": "continueErrorOutput"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Preparar Pregunta 1",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Preparar Pregunta 2 ",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embedding examen": {
+        "main": [
+          []
+        ]
+      },
+      "Preparar Pregunta 1": {
+        "main": [
+          [
+            {
+              "node": "Embedding examen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar Pregunta 2 ": {
+        "main": [
+          [
+            {
+              "node": "Embedding examen1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embedding examen1": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "9430d9ea68153e12d07d644c5ffcb5574531ff19ef9803add25ebc6f5a3d9d8f"
+    }
+  }

@@ -17,7 +17,7 @@ spring:
 
 # URL del workflow de n8n que recibe la pregunta y ejecuta el flujo RAG
 n8n:
-  webhook-url: https://reselect-contort-carwash.ngrok-free.dev/webhook/buscar_curso_rutaIA
+  webhook-url: https://monthly-zipfile-pessimism.ngrok-free.dev/webhook-test/examen
   timeout-ms: 15000
 
 

@@ -1,6 +1,6 @@
 package com.rutaia.backend.repository;
 
-import com.rutaia.backend.entity.Recomendacion;
+import com.rutaia.backend.model.Recomendacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

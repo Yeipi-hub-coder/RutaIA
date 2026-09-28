@@ -11,4 +11,5 @@ public class FuenteResponseDTO {
     private String descripcion;
     private String categoria;
     private BigDecimal similitud;
+    private String nivelExperiencia;
 }

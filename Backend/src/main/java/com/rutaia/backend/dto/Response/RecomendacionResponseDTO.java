@@ -15,4 +15,5 @@ public class RecomendacionResponseDTO {
     private List<FuenteResponseDTO> fuentes;
     private EstadoFinal estado;
     private LocalDateTime fecha;
+    private String nivelExperiencia;
 }

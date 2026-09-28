@@ -24,4 +24,6 @@ public class Fuente {
 
     @Column(nullable = false, precision = 5, scale = 4)
     private BigDecimal similitud;
+
+
 }

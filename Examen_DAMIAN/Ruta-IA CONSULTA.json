@@ -13,22 +13,22 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1584,
-        432
+        -1600,
+        224
       ],
       "webhookId": "f5bf59c8-0502-462a-ada9-c936d32acad0"
     },
     {
       "parameters": {
-        "jsCode": "const b=$json.body??$json; \nif(!b.pregunta?.trim()) throw new Error('Falta pregunta'); \nreturn [{json: \n  {\n    pregunta:b.pregunta.trim(),\n    qdrant_url:'http://qdrant:6333',\n    coleccion:'cursos-RutaIA',\n    modelo_embedding:'openai/text-embedding-3-small',\n    limite:5\n  }\n}];"
+        "jsCode": "const b=$json.body??$json; \nif(!b.pregunta?.trim()) throw new Error('Falta pregunta'); \nreturn [{json: \n  {\n    pregunta:b.pregunta.trim($input.first().json.body.nivelExperiencia),\n    qdrant_url:'http://qdrant:6333',\n    coleccion:'cursos-RutaIA',\n    modelo_embedding:'openai/text-embedding-3-small',\n    limite:5\n  }\n}];"
       },
       "id": "d8fb87bc-6a1f-4d36-850a-2802b7d23453",
       "name": "Preparar Pregunta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1328,
-        432
+        -1344,
+        224
       ]
     },
     {
@@ -57,8 +57,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1072,
-        432
+        -1088,
+        224
       ],
       "credentials": {
         "httpBearerAuth": {
@@ -77,8 +77,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -800,
-        416
+        -816,
+        208
       ]
     },
     {
@@ -105,8 +105,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -544,
-        416
+        -560,
+        208
       ],
       "onError": "continueErrorOutput"
     },
@@ -119,8 +119,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        544,
-        64
+        528,
+        -144
       ]
     },
     {
@@ -147,19 +147,19 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        816,
-        448
+        800,
+        240
       ]
     },
     {
       "parameters": {
-        "jsCode": "const c = $('Preparar Pregunta').first().json;\nconst r = $input.first().json;\n\nconst pts = r.result?.points ?? r.result ?? [];\n\nconst UMBRAL_MINIMO = 0.4;\n\nconst resultados = pts\n  .filter(p => Number(p.score ?? 0) >= UMBRAL_MINIMO)\n  .map(p => ({\n  cursoId: p.id,\n  nombre: p.payload?.nombre ?? '',\n  descripcion: p.payload?.descripcion ?? '',\n  categoria: p.payload?.categoria ?? '',\n  nivel: p.payload?.nivel ?? '',\n  duracion: p.payload?.duracion ?? '',\n  similitud: Number(p.score ?? 0)\n}));\n\nreturn [{\n  json: {\n    idConsulta: c.idConsulta,\n    pregunta: c.pregunta,\n    resultados,\n    hayResultados: resultados.length > 0\n  }\n}];"
+        "jsCode": "const c = $('Preparar Pregunta').first().json;\nconst r = $input.first().json;\n\nconst pts = r.result?.points ?? r.result ?? [];\n\nconst UMBRAL_MINIMO = 0.4;\n\nconst resultados = pts\n  .filter(p => Number(p.score ?? 0) >= UMBRAL_MINIMO)\n  .map(p => ({\n  cursoId: p.id,\n  nombre: p.payload?.nombre ?? '',\n  descripcion: p.payload?.descripcion ?? '',\n  categoria: p.payload?.categoria ?? '',\n  nivel: p.payload?.nivel ?? '', //aqui esta el payload de nivel\n  duracion: p.payload?.duracion ?? '',\n  similitud: Number(p.score ?? 0)\n}));\n\nreturn [{\n  json: {\n    idConsulta: c.idConsulta,\n    pregunta: c.pregunta,\n    nivel: c.nivelExperiencia,\n    resultados,\n    hayResultados: resultados.length > 0\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -304,
-        400
+        -320,
+        192
       ],
       "id": "d0669bf4-2383-43e0-a124-dc8e7575579f",
       "name": "Filtrar Umbral"
@@ -192,8 +192,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -64,
-        400
+        -80,
+        192
       ],
       "id": "aae2f795-3a79-418e-bd72-545be8b007b6",
       "name": "If"
@@ -205,8 +205,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        432,
-        592
+        416,
+        384
       ],
       "id": "f6101f18-693d-4129-b84e-ad79c3a8f02b",
       "name": "Busqueda Fallida"
@@ -220,14 +220,14 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({\n  model: \"openai/gpt-4o-mini\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"Eres un asesor académico. Responde ÚNICAMENTE con base en el contexto de cursos proporcionado. No inventes cursos que no estén en el contexto. Si el contexto no tiene información suficiente para responder, dilo explícitamente.\"\n    },\n    {\n      role: \"user\",\n      content:\n        \"Pregunta del estudiante: \" + $json.pregunta +\n        \"\\n\\nCursos disponibles:\\n\" +\n        $json.resultados\n          .map(r =>\n            `- ${r.nombre}: ${r.descripcion} (Categoría: ${r.categoria}, Nivel: ${r.nivel}, Duración: ${r.duracion}h, Similitud: ${r.similitud})`\n          )\n          .join(\"\\n\")\n    }\n  ]\n}) }}",
+        "body": "={{ JSON.stringify({\n  model: \"openai/gpt-4o-mini\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"Eres un asesor académico. Responde ÚNICAMENTE con base en el contexto de cursos proporcionado. No inventes cursos que no estén en el contexto. Si el contexto no tiene información suficiente para responder, dilo explícitamente.Si el usuario indica el nivel de experiencia solo procura recomendar cursos con ese nivel de experiencia\"\n    },\n    {\n      role: \"user\",\n      content:\n        \"Pregunta del estudiante: \" + $json.pregunta +\n        \"\\n\\nCursos disponibles:\\n\" +\n        $json.resultados\n          .map(r =>\n            `- ${r.nombre}: ${r.descripcion} (Categoría: ${r.categoria}, Nivel: ${r.nivel}, Duración: ${r.duracion}h, Similitud: ${r.similitud})`\n          )\n          .join(\"\\n\")\n    }\n  ]\n}) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        336,
-        80
+        192,
+        -128
       ],
       "id": "ef7a689a-ea3a-4ab6-9a15-2a09274c7ebd",
       "name": "Generar Respuesta",
@@ -246,8 +246,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -960,
-        624
+        -976,
+        416
       ],
       "id": "1a80eda3-3bf2-43a6-bf1e-ec584d24d42c",
       "name": "Embedding fallido"
@@ -259,8 +259,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -432,
-        640
+        -448,
+        432
       ],
       "id": "6b7cc7f1-3949-4290-8b29-0dde08590b6b",
       "name": "Qdrant Fallido"
@@ -272,8 +272,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        272
+        432,
+        64
       ],
       "id": "e9925763-f0aa-4bfc-9244-50d0fd158f0e",
       "name": "Generar Rta Fallida"
@@ -458,7 +458,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "c310513c-8328-4660-94a5-2f8dad0996b9",
+  "versionId": "19495746-d749-46f5-b31c-0ccfbffaafe7",
   "meta": {
     "instanceId": "455a100aeea20d7fb05bf5b5d63457aac0736dc81fe3d671b79aabf6cef9f78b"
   },
@@ -466,4 +466,3 @@
   "id": "RgJKT4eEtTDSkiuh",
   "tags": []
 }
-

@@ -107,7 +107,7 @@ public class ConsultaServiceImpl implements ConsultaService {
         // Un solo SELECT con JOIN FETCH en vez de una consulta extra por cada
         // consulta/fuente/curso (mismo problema N+1 que tenia el historial por estudiante).
         return recomendacionRepository.findTodasConDetalle().stream()
-                .map(r -> toConsultaResponse(r.getConsulta(), r))
+                .map(r -> DtoToConsultaResponse(r.getConsulta(), r))
                 .toList();
     }
 
@@ -115,7 +115,7 @@ public class ConsultaServiceImpl implements ConsultaService {
     public List<ConsultaResponseDTO> historial(Integer id) {
         buscarOFallar(id); // valida que el estudiante exista
         return recomendacionRepository.findConEstudianteId(id).stream()
-                .map(r -> toConsultaResponse(r.getConsulta(), r))
+                .map(r -> DtoToConsultaResponse(r.getConsulta(), r))
                 .toList();
     }
 

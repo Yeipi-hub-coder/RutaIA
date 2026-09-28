@@ -30,11 +30,7 @@ public class N8nClientServiceImpl implements N8nClientService {
         } catch (RestClientException ex) {
             // Cubre timeouts, conexion rechazada, respuestas 4xx/5xx del workflow, etc. (RN10)
             log.error("Error llamando al webhook de n8n: {}", ex.getMessage());
-            return N8nResponseDTO.builder()
-                    .estado("ERROR")
-                    .respuesta("No fue posible generar una recomendacion en este momento.")
-                    .fuentes(java.util.List.of())
-                    .build();
+            return N8nResponseDTO.builder().build();
         }
     }
 }
